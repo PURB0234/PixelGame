@@ -42,7 +42,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if player_node and not is_falling:
-		var behind := player_node.global_position.y < global_position.y - 8.0 and abs(player_node.global_position.x - global_position.x) < 22.0
+		var behind: bool = (player_node.global_position.y < global_position.y - 8.0) and (abs(player_node.global_position.x - global_position.x) < 22.0)
 		var target_alpha := 0.58 if behind else 1.0
 		if abs(tree_sprite.modulate.a - target_alpha) > 0.04:
 			if color_tween and color_tween.is_valid():
