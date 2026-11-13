@@ -20,11 +20,11 @@ collision_mask = 0
 script = ExtResource("1")
 
 [node name="Shadow" type="Node2D" parent="."]
-position = Vector2(3, 0)
+position = Vector2(1, 0)
 script = ExtResource("2")
-radius_x = 14.0
-radius_y = 4.5
-alpha = 0.16
+radius_x = 18.0
+radius_y = 6.0
+alpha = 0.26
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(0, -4)
