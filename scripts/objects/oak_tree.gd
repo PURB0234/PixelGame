@@ -21,16 +21,16 @@ const SFX_FALL = preload("res://audio/falling-tree.wav")
 const SFX_IMPACT    = preload("res://audio/tree_impact.wav")
 const SFX_CHOP = preload("res://audio/chopping-tree.wav")
 
-# Radius ellipse shadow per stage [radius_x, radius_y] dalam pixel
+# Shadow footprint per growth stage [half-width, half-height] in pixels.
 const SHADOW_SIZES = {
 		0: Vector2(3.0, 1.5),
-		1: Vector2(4.5, 2.0),
-		2: Vector2(6.5, 2.5),
-		3: Vector2(9.0, 3.5),
-		4: Vector2(14.0, 4.5),
-		5: Vector2(11.5, 4.0),
-		6: Vector2(8.0, 3.0),
-		7: Vector2(5.5, 2.5),
+		1: Vector2(5.0, 2.5),
+		2: Vector2(8.0, 3.0),
+		3: Vector2(12.0, 4.5),
+		4: Vector2(18.0, 6.0),
+		5: Vector2(14.0, 5.0),
+		6: Vector2(10.0, 3.8),
+		7: Vector2(7.0, 2.8),
 }
 
 @export_range(0, 7, 1) var current_stage: int = 4:
