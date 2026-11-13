@@ -59,8 +59,8 @@ func _draw_lobe(center: Vector2, width_ratio: float, height_ratio: float, opacit
 		Vector2(0.10, 1.0), Vector2(-0.68, 0.70)
 	]
 	for p in radii:
-		var x := (center.x + p.x * width_ratio * 0.5) * radius_x
-		var y := (center.y + p.y * height_ratio * 0.5) * radius_y
+		var x: float = (center.x + p.x * width_ratio * 0.5) * radius_x
+		var y: float = (center.y + p.y * height_ratio * 0.5) * radius_y
 		lobe.append(Vector2(round(x), round(y)))
 	draw_colored_polygon(lobe, _shadow_tint(opacity))
 
