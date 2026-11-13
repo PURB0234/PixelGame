@@ -170,8 +170,8 @@ func _spawn_hit_particles(fall_sign: float, amount: int = 6) -> void:
 		p_leaf.explosiveness = 0.85
 		p_leaf.amount = amount
 		p_leaf.lifetime = 0.9
-		p_leaf.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
-		p_leaf.emission_rect_extents = Vector2(7.0, 3.0)
+		p_leaf.emission_shape = CPUParticles2D.EMISSION_SHAPE_BOX
+		p_leaf.emission_box_extents = Vector2(7.0, 3.0)
 		p_leaf.scale_amount_min = 0.9
 		p_leaf.scale_amount_max = 1.4
 		p_leaf.direction = Vector2(fall_sign, -1.0)
@@ -252,6 +252,7 @@ func _play_falling_animation(fall_sign: float, canopy_tex: Texture2D, pivot_y: f
 				_spawn_hit_particles(fall_sign, 22)
 				_spawn_logs(fall_sign, log_count)
 				_spawn_impact_dust(fall_sign)
+				_play_sound(SFX_IMPACT, -1.5)
 		)
 		tween.tween_property(canopy, "modulate:a", 0.0, 0.35)
 		tween.tween_callback(func():
