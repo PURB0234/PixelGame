@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/objects/cave_ladder.gd" id="1_ladd"]
+[ext_resource type="Texture2D" path="res://graphics/objects/mining/cave_ladder.png" id="2_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_exit"]
+size = Vector2(24, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(24, 10)
+
+[node name="CaveLadder" type="StaticBody2D" groups=["Objects"]]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_ladd")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_tex")
+offset = Vector2(0, -20)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -26)
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="ExitArea" type="Area2D" parent="."]
+collision_layer = 32
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ExitArea"]
+position = Vector2(0, -10)
+shape = SubResource("RectangleShape2D_exit")

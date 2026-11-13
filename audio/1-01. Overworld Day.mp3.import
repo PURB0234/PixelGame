@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://d35yn1dwurwbn"
+path="res://.godot/imported/1-01. Overworld Day.mp3-3265a37317e2b13bbd640b9a5ec5fbb4.mp3str"
+
+[deps]
+
+source_file="res://audio/1-01. Overworld Day.mp3"
+dest_files=["res://.godot/imported/1-01. Overworld Day.mp3-3265a37317e2b13bbd640b9a5ec5fbb4.mp3str"]
+
+[params]
+
+loop=true
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

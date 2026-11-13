@@ -1,0 +1,38 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/objects/cave_entrance.gd" id="1_entr"]
+[ext_resource type="Texture2D" path="res://graphics/objects/mining/cave_entrance.png" id="2_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_left"]
+size = Vector2(18, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_right"]
+size = Vector2(18, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_door"]
+size = Vector2(24, 24)
+
+[node name="CaveEntrance" type="StaticBody2D" groups=["Objects"]]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_entr")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_tex")
+offset = Vector2(0, -28)
+
+[node name="CollisionLeft" type="CollisionShape2D" parent="."]
+position = Vector2(-20, -10)
+shape = SubResource("RectangleShape2D_left")
+
+[node name="CollisionRight" type="CollisionShape2D" parent="."]
+position = Vector2(20, -10)
+shape = SubResource("RectangleShape2D_right")
+
+[node name="DoorArea" type="Area2D" parent="."]
+collision_layer = 32
+collision_mask = 2
+
+[node name="DoorShape" type="CollisionShape2D" parent="DoorArea"]
+position = Vector2(0, -2)
+shape = SubResource("RectangleShape2D_door")

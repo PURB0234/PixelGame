@@ -1,0 +1,24 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/objects/mine_rock.gd" id="1_rock"]
+[ext_resource type="Texture2D" path="res://graphics/objects/mining/rock_stone.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_rock"]
+radius = 7.0
+
+[node name="MineRock" type="StaticBody2D" groups=["Objects", "Pickaxe_able"]]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_rock")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_tex")
+offset = Vector2(0, -8)
+
+[node name="CrackSprite" type="Sprite2D" parent="."]
+visible = false
+offset = Vector2(0, -8)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -4)
+shape = SubResource("CircleShape2D_rock")

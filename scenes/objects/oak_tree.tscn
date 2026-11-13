@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://dy207m6gyyvdv"]
+
+[ext_resource type="Script" uid="uid://na4xom50a4vd" path="res://scripts/objects/oak_tree.gd" id="1_oak"]
+[ext_resource type="Script" uid="uid://ba0uuww5u8f26" path="res://scripts/objects/tree_shadow.gd" id="2_shadow"]
+[ext_resource type="Texture2D" uid="uid://d11oxv3tf2xet" path="res://graphics/plants/oak_tree/stage_1_seed.png" id="3_oak"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_oak"]
+radius = 5.0
+height = 22.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_behind"]
+size = Vector2(26, 36)
+
+[node name="OakTree" type="StaticBody2D" unique_id=2043664696 groups=["Objects"]]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_oak")
+
+[node name="Shadow" type="Node2D" parent="." unique_id=712911457]
+position = Vector2(0, -2)
+script = ExtResource("2_shadow")
+radius_x = 20.0
+radius_y = 7.5
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2078714392]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("3_oak")
+offset = Vector2(0, -58)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1179796523]
+position = Vector2(0, -4)
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_oak")
+
+[node name="BehindTreeArea2D" type="Area2D" parent="." unique_id=198091162]
+position = Vector2(0, -38)
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BehindTreeArea2D" unique_id=1480440254]
+shape = SubResource("RectangleShape2D_behind")
+
+[connection signal="body_entered" from="BehindTreeArea2D" to="." method="_on_behind_tree_area_2d_body_entered"]
+[connection signal="body_exited" from="BehindTreeArea2D" to="." method="_on_behind_tree_area_2d_body_exited"]
