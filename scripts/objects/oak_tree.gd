@@ -42,6 +42,7 @@ const SHADOW_SIZES = {
 
 var tree_health: int = 3
 var color_tween: Tween
+var shake_tween: Tween
 var is_falling: bool = false
 var player_node: Node2D = null
 
@@ -132,10 +133,12 @@ func hit(tool: Enum.Tool, dir: Vector2) -> void:
 		$Sprite2D.modulate = Color(2, 2, 2, 1)
 		color_tween.tween_property($Sprite2D, "modulate", Color(1, 1, 1, 1), 0.15)
 
-		var tween_shake = create_tween()
-		tween_shake.tween_property($Sprite2D, "position:x", 3.0 * fall_sign, 0.04)
-		tween_shake.tween_property($Sprite2D, "position:x", -3.0 * fall_sign, 0.04)
-		tween_shake.tween_property($Sprite2D, "position:x", 0.0, 0.04)
+		if shake_tween and shake_tween.is_valid():
+				shake_tween.kill()
+		shake_tween = create_tween()
+		shake_tween.tween_property($Sprite2D, "position:x", 2.5 * fall_sign, 0.045)
+		shake_tween.tween_property($Sprite2D, "position:x", -2.0 * fall_sign, 0.045)
+		shake_tween.tween_property($Sprite2D, "position:x", 0.0, 0.055)
 
 		_spawn_hit_particles(fall_sign)
 
@@ -167,6 +170,8 @@ func _spawn_hit_particles(fall_sign: float, amount: int = 6) -> void:
 		p_leaf.explosiveness = 0.85
 		p_leaf.amount = amount
 		p_leaf.lifetime = 0.9
+		p_leaf.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+		p_leaf.emission_rect_extents = Vector2(7.0, 3.0)
 		p_leaf.scale_amount_min = 0.9
 		p_leaf.scale_amount_max = 1.4
 		p_leaf.direction = Vector2(fall_sign, -1.0)
@@ -187,6 +192,8 @@ func _spawn_hit_particles(fall_sign: float, amount: int = 6) -> void:
 		p_chip.explosiveness = 0.95
 		p_chip.amount = ceili(amount * 0.5)
 		p_chip.lifetime = 0.5
+		p_chip.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+		p_chip.emission_rect_extents = Vector2(3.0, 2.0)
 		p_chip.scale_amount_min = 0.8
 		p_chip.scale_amount_max = 1.2
 		p_chip.direction = Vector2(fall_sign, -0.3)
@@ -242,14 +249,33 @@ func _play_falling_animation(fall_sign: float, canopy_tex: Texture2D, pivot_y: f
 		tween.tween_property(canopy, "rotation", target_rot + deg_to_rad(3.0 * fall_sign), 0.07)
 		tween.tween_property(canopy, "rotation", target_rot, 0.06)
 		tween.tween_callback(func():
-				_spawn_hit_particles(fall_sign, 18)
+				_spawn_hit_particles(fall_sign, 22)
 				_spawn_logs(fall_sign, log_count)
+				_spawn_impact_dust(fall_sign)
 		)
 		tween.tween_property(canopy, "modulate:a", 0.0, 0.35)
 		tween.tween_callback(func():
 				canopy.queue_free()
 				is_falling = false
 		)
+
+func _spawn_impact_dust(fall_sign: float) -> void:
+		var dust = CPUParticles2D.new()
+		dust.emitting = false
+		dust.one_shot = true
+		dust.explosiveness = 1.0
+		dust.amount = 10
+		dust.lifetime = 0.45
+		dust.direction = Vector2(fall_sign, -0.15)
+		dust.spread = 75.0
+		dust.initial_velocity_min = 12.0
+		dust.initial_velocity_max = 38.0
+		dust.gravity = Vector2(0, 90)
+		dust.color = Color(0.48, 0.34, 0.22, 0.7)
+		dust.position = Vector2(0, 1)
+		add_child(dust)
+		dust.emitting = true
+		get_tree().create_timer(0.6).timeout.connect(dust.queue_free)
 
 func _play_sound(stream: AudioStream, vol_db: float) -> void:
 		var audio_player = AudioStreamPlayer2D.new()
