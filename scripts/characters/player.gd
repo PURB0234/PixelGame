@@ -3,6 +3,16 @@ extends CharacterBody2D
 
 var debug: bool = true
 
+# Player health
+signal health_changed(current_health: int, max_health: int)
+signal player_died
+var max_health: int = Data.PLAYER_MAX_HEALTH
+var health: int = Data.PLAYER_MAX_HEALTH
+var is_dead: bool = false
+var invulnerability_time: float = 0.0
+const INVULNERABILITY_DURATION: float = 0.8
+var health_ui: CanvasLayer
+
 const SPEED: float = Data.PLAYER_SPEED
 var direction: Vector2
 var can_move: bool = true
@@ -47,6 +57,10 @@ var update_state: Enum.State = Enum.State.HOUSE;
 
 
 func _ready():
+	var health_ui_scene = preload("res://scenes/ui/health_bar.tscn")
+	health_ui = health_ui_scene.instantiate()
+	add_child(health_ui)
+	health_ui.update_health(health, max_health)
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING  # No sliding/pushing
 	var player_light: PointLight2D = PointLight2D.new()
 	$".".add_child(player_light)
@@ -82,7 +96,17 @@ func _ready():
 	player_light.texture_scale = 0.5
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	if invulnerability_time > 0.0:
+		invulnerability_time = maxf(invulnerability_time - delta, 0.0)
+		$Sprite2D.visible = int(invulnerability_time * 12.0) % 2 == 0
+	elif not is_dead:
+		$Sprite2D.visible = true
+
+	if is_dead:
+		velocity = Vector2.ZERO
+		return
+
 	if update_state != current_state:
 		if current_state == Enum.State.BUILDING:
 			update_control_ui.emit(Enum.KEYBOARD.CHANGE_MODE, current_state, Enum.State.BUILDING)		
@@ -342,3 +366,36 @@ func _on_interact_range_area_2d_body_exited(body: Node2D) -> void:
 
 func _on_step_timer_timeout() -> void:
 	$Sounds/Step.play()
+
+
+# Called by enemies and hazards when the player is hit.
+func take_damage(amount: int = 1) -> void:
+	if is_dead or invulnerability_time > 0.0 or amount <= 0:
+		return
+
+	health = maxi(health - amount, 0)
+	invulnerability_time = INVULNERABILITY_DURATION
+	if health_ui:
+		health_ui.update_health(health, max_health)
+	if health <= 0:
+		is_dead = true
+		velocity = Vector2.ZERO
+		player_died.emit()
+
+
+func heal(amount: int) -> void:
+	if is_dead or amount <= 0:
+		return
+
+	health = mini(health + amount, max_health)
+	if health_ui:
+		health_ui.update_health(health, max_health)
+
+
+func restore_health() -> void:
+	is_dead = false
+	health = max_health
+	invulnerability_time = 0.0
+	$Sprite2D.visible = true
+	if health_ui:
+		health_ui.update_health(health, max_health)
