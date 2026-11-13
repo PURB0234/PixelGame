@@ -375,11 +375,13 @@ func take_damage(amount: int = 1) -> void:
 
 	health = maxi(health - amount, 0)
 	invulnerability_time = INVULNERABILITY_DURATION
+	health_changed.emit(health, max_health)
 	if health_ui:
 		health_ui.update_health(health, max_health)
 	if health <= 0:
 		is_dead = true
 		velocity = Vector2.ZERO
+		$Sprite2D.visible = true
 		player_died.emit()
 
 
@@ -388,6 +390,7 @@ func heal(amount: int) -> void:
 		return
 
 	health = mini(health + amount, max_health)
+	health_changed.emit(health, max_health)
 	if health_ui:
 		health_ui.update_health(health, max_health)
 
@@ -395,6 +398,7 @@ func heal(amount: int) -> void:
 func restore_health() -> void:
 	is_dead = false
 	health = max_health
+	health_changed.emit(health, max_health)
 	invulnerability_time = 0.0
 	$Sprite2D.visible = true
 	if health_ui:
