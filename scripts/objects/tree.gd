@@ -1,6 +1,7 @@
 extends StaticBody2D
 
 const TREE_TEXTURE = preload("res://graphics/plants/oak_tree/stage_5_mature.png")
+const STUMP_TEXTURE = preload("res://graphics/plants/oak_tree/stump_mature_exact.png")
 const FALL_CANOPY = preload("res://graphics/plants/oak_tree/canopy_mature.png")
 const APPLE_TEXTURE = preload("res://graphics/plants/apple.png")
 const LEAF_TEX = preload("res://graphics/plants/oak_tree/leaf_particle_1.png")
@@ -31,6 +32,10 @@ func _ready() -> void:
 	add_to_group("Tree")
 	add_to_group("Axe_able")
 	tree_sprite.texture = TREE_TEXTURE
+	tree_sprite.offset = Vector2(0, -TREE_TEXTURE.get_height() / 2.0)
+	$Stump.texture = STUMP_TEXTURE
+	$Stump.scale = Vector2(0.1, 0.1)
+	$Stump.offset = Vector2(0, -STUMP_TEXTURE.get_height() / 2.0)
 	create_apple()
 	$Stump.visible = false
 	$StumpCollision.disabled = true
