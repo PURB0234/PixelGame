@@ -171,6 +171,7 @@ const BLOB_DAMAGE = 1  # Damage to Plants
 
 # ======== Player ========
 const PLAYER_SPEED = 70.0
+const PLAYER_MAX_HEALTH = 5
 var TARGET_HIGHLIGHTER: bool = false
 # ======== END Player ========
 
