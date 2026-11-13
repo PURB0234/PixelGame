@@ -51,16 +51,16 @@ shape = SubResource("StumpCollision")
 position = Vector2(0, -4)
 
 [node name="Apple1" type="Marker2D" parent="AppleSpawnPositions"]
-position = Vector2(-13, -27)
+position = Vector2(-8, -29)
 
 [node name="Apple2" type="Marker2D" parent="AppleSpawnPositions"]
-position = Vector2(12, -31)
+position = Vector2(8, -30)
 
 [node name="Apple3" type="Marker2D" parent="AppleSpawnPositions"]
-position = Vector2(1, -43)
+position = Vector2(-5, -42)
 
 [node name="Apple4" type="Marker2D" parent="AppleSpawnPositions"]
-position = Vector2(18, -15)
+position = Vector2(6, -22)
 
 [node name="Apples" type="Node2D" parent="."]
 position = Vector2(0, -4)
