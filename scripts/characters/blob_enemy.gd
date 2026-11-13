@@ -226,6 +226,8 @@ func update_blend_positions() -> void:
 
 
 func _on_area_2d_body_entered(body: Node2D) -> void:
-	if body.has_method("grow"):
+	if body.has_method("take_damage"):
+		body.take_damage(blob_damage)
+	elif body.has_method("grow"):
 		body.grow(false, blob_damage)
 		die()
