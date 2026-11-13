@@ -21,16 +21,16 @@ const SFX_FALL = preload("res://audio/falling-tree.wav")
 const SFX_IMPACT    = preload("res://audio/tree_impact.wav")
 const SFX_CHOP = preload("res://audio/chopping-tree.wav")
 
-# Shadow footprint per growth stage [half-width, half-height] in pixels.
+# Foliage-shaped shadow footprint per growth stage [half-width, half-height].
 const SHADOW_SIZES = {
 		0: Vector2(3.0, 1.5),
 		1: Vector2(5.0, 2.5),
-		2: Vector2(8.0, 3.0),
-		3: Vector2(12.0, 4.5),
-		4: Vector2(18.0, 6.0),
-		5: Vector2(14.0, 5.0),
-		6: Vector2(10.0, 3.8),
-		7: Vector2(7.0, 2.8),
+		2: Vector2(9.0, 3.5),
+		3: Vector2(16.0, 6.0),
+		4: Vector2(24.0, 9.0),
+		5: Vector2(18.0, 7.0),
+		6: Vector2(12.0, 4.5),
+		7: Vector2(8.0, 3.0),
 }
 
 @export_range(0, 7, 1) var current_stage: int = 4:
