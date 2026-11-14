@@ -2,11 +2,31 @@
 extends Node2D
 
 const FLORA_TEXTURES: Array[Texture2D] = [
+<<<<<<< HEAD
 		preload("res://graphics/objects/grass_assets/06_grass_ground_tile.png"),
+=======
+	preload("res://graphics/objects/grass_assets/07_grass_clump.png"),
+	preload("res://graphics/objects/grass_assets/08_grass_clump.png"),
+	preload("res://graphics/objects/grass_assets/09_white_flower_grass.png"),
+	preload("res://graphics/objects/grass_assets/10_berry_grass.png"),
+	preload("res://graphics/objects/grass_assets/11_leaf_bush.png"),
+	preload("res://graphics/objects/grass_assets/12_broad_leaf_plant.png"),
+	preload("res://graphics/objects/grass_assets/13_purple_flower_grass.png"),
+	preload("res://graphics/objects/grass_assets/14_white_flower_bush.png"),
+	preload("res://graphics/objects/grass_assets/15_leaf_bush.png"),
+	preload("res://graphics/objects/grass_assets/16_pink_flower_bush.png"),
+	preload("res://graphics/objects/grass_assets/17_orange_flower_bush.png"),
+	preload("res://graphics/objects/grass_assets/18_small_leaf_plant.png"),
+	preload("res://graphics/objects/grass_assets/19_white_flower_patch.png"),
+	preload("res://graphics/objects/grass_assets/20_round_leaf_bush.png"),
+	preload("res://graphics/objects/grass_assets/21_leafy_grass_clump.png"),
+	preload("res://graphics/objects/grass_assets/26_small_rock_grass.png"),
+	preload("res://graphics/objects/grass_assets/27_leafy_plant.png"),
+>>>>>>> 781343887191a1cbc7e84e22dace1b4ae57561d4
 ]
 
 @export var random: bool = false
-@export_range(0, 17, 1) var variant: int = 0:
+@export_range(0, 16, 1) var variant: int = 0:
 		set(value):
 				variant = clampi(value, 0, FLORA_TEXTURES.size() - 1)
 				_rebuild_sprites()
@@ -54,11 +74,11 @@ func _rebuild_sprites() -> void:
 				sprite.texture = FLORA_TEXTURES[chosen_variant]
 				sprite.scale = Vector2.ONE
 				if i == 0:
-						sprite.offset = Vector2(0, -16)
+						sprite.offset = Vector2(0.0, -sprite.texture.get_height() * 0.5)
 				else:
 						sprite.offset = Vector2(
 								randf_range(-spread, spread),
-								-16.0 + randf_range(-spread * 0.25, spread * 0.25)
+								-sprite.texture.get_height() * 0.5 + randf_range(-spread * 0.1, spread * 0.1)
 						)
 				sprite.flip_h = randf() > 0.5
 				sprite.z_index = i

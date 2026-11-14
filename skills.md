@@ -49,3 +49,14 @@
 - Preserve the original target_position; obstacle steering is temporary and must resume toward the clicked destination.
 - Regression checks in Godot: click past both sides of a house, mature tree, cave entrance, and rock; confirm the player walks around the obstacle and resumes toward the clicked point. Click into a fully blocked location and confirm the player stops rather than vibrating against it. Confirm keyboard movement and auto-chop behavior remain unchanged.
 - Runtime validation for this change is pending until the project is run in Godot; do not treat static inspection as a successful gameplay test.
+<<<<<<< HEAD
+=======
+
+## Grass decoration asset rework
+
+- `scenes/objects/grass_deco.tscn` must remain a lightweight Node2D with only the `grass_deco.gd` script; do not attach legacy daisy or Ninja Adventure shadow textures.
+- All decoration variants are loaded exclusively from `res://graphics/objects/grass_assets/`. The 17 foliage/ground-detail crops (07–21, 26, 27) are the randomized/dense decoration pool. Keep `06_grass_ground_tile.png` out of this pool because it is a ground tile, not a foreground decoration.
+- Asset crop dimensions vary. Anchor each Sprite2D by its own texture height so the bottom edge sits at the decoration origin; do not use a fixed 16px offset for every crop.
+- Keep existing random/dense selection, wind sway, player-triggered squish, and trigger collision behavior intact when changing the art pool.
+- Verify all preload paths exist and run the scene in Godot to inspect baseline alignment, overlap, and animation. Runtime visual validation is required before calling the rework complete.
+>>>>>>> 781343887191a1cbc7e84e22dace1b4ae57561d4
