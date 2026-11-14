@@ -2,9 +2,6 @@
 extends Node2D
 
 const FLORA_TEXTURES: Array[Texture2D] = [
-<<<<<<< HEAD
-		preload("res://graphics/objects/grass_assets/06_grass_ground_tile.png"),
-=======
 	preload("res://graphics/objects/grass_assets/07_grass_clump.png"),
 	preload("res://graphics/objects/grass_assets/08_grass_clump.png"),
 	preload("res://graphics/objects/grass_assets/09_white_flower_grass.png"),
@@ -22,8 +19,10 @@ const FLORA_TEXTURES: Array[Texture2D] = [
 	preload("res://graphics/objects/grass_assets/21_leafy_grass_clump.png"),
 	preload("res://graphics/objects/grass_assets/26_small_rock_grass.png"),
 	preload("res://graphics/objects/grass_assets/27_leafy_plant.png"),
->>>>>>> 781343887191a1cbc7e84e22dace1b4ae57561d4
 ]
+
+# Cropped source art is 102-186 px tall; display decorations at a game-world scale.
+const DECORATION_MAX_HEIGHT: float = 40.0
 
 @export var random: bool = false
 @export_range(0, 16, 1) var variant: int = 0:
@@ -72,7 +71,8 @@ func _rebuild_sprites() -> void:
 
 				var sprite := Sprite2D.new()
 				sprite.texture = FLORA_TEXTURES[chosen_variant]
-				sprite.scale = Vector2.ONE
+				var texture_height: float = float(sprite.texture.get_height())
+				sprite.scale = Vector2.ONE * minf(1.0, DECORATION_MAX_HEIGHT / texture_height)
 				if i == 0:
 						sprite.offset = Vector2(0.0, -sprite.texture.get_height() * 0.5)
 				else:
