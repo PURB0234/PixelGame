@@ -1,5 +1,7 @@
 # Project Working Rules
 
+- **Always read this file (`skills.md`) first before starting any work on this project**, so the context and rules below are applied.
+- **After every fix or change: update `skills.md` (rules/context/lessons learned), commit, and push** so the owner can just `git pull`. This is explicitly authorized by the owner and overrides the older "do not commit or push" rule below.
 - Keep replies short, direct, and focused on the requested task. Avoid long explanations and unnecessary questions.
 - Make the requested change directly when the requirements are clear; ask only when an essential detail is missing.
 - Do not generate images or other visual assets unless the user explicitly requests them.
@@ -9,7 +11,7 @@
 - For gameplay changes, reuse existing signals, animations, damage, health, drops, and interaction pipelines wherever possible.
 - Avoid broad refactors. Keep changes small and compatible with the current branch.
 - Never claim a feature is tested unless it was actually run and verified in the target environment. State clearly when Godot/runtime testing was not possible.
-- Do not commit or push unless the user has asked for implementation in the project or otherwise clearly authorized it.
+- Commit and push after every completed change (authorized by the owner). Commit only the files needed for the task; never commit `.tmp` files or Godot cache.
 - After changes, report only the files changed, the commit (if any), and any important testing limitation.
 
 
@@ -24,3 +26,15 @@
 - Test in Godot: click a mature tree from a distance, confirm the player approaches, swings repeatedly, damages the same tree, stops after it falls, and does not change the selected tool. Also test manual movement and switching tools to confirm auto-chop cancels cleanly.
 
 - Parser compatibility: `_process_auto_chop()` may be called directly when auto-chop starts and deferred with an explicit delta after an animation callback. Keep its `delta` parameter optional (default `0.0`) or pass an argument at every call site; otherwise Godot reports `Too few arguments` during parsing.
+
+## Auto-chop fix log (root cause + rules)
+
+- Root cause of "player walks to the tree but never chops": the arrival check (`distance <= 19`) was tighter than where the player actually stops. The approach target was 17px from the tree and `move()` accepts arrival within 4px, so the player stopped at ~20px, was re-targeted every frame, and never swung. Keep `AUTO_CHOP_STAND_DISTANCE + 4 < AUTO_CHOP_RANGE < 22` (22 is the axe hit range in `level.gd` `_on_player_tool_use`). Current values: stand 14, range 20.
+- Facing direction used for auto-chop must be snapped to 4 directions via `_to_cardinal()`. A diagonal blend position plays two axe animations at once, so `tool_use_emit` fires twice per swing (double damage).
+- Stuck recovery: if the player makes no progress while approaching for `AUTO_CHOP_STUCK_TIMEOUT` (1.0s), auto-chop cancels instead of freezing. Keep this when changing movement/collision.
+
+## Headless runtime testing (works in this environment)
+
+- Godot 4.7.2 can be downloaded from `https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip`.
+- Run `godot --headless --import --path .` once, then run a `SceneTree` script with `godot --headless --path . -s test.gd` that instantiates `res://scenes/levels/level.tscn`, gets `%Player`, calls `_begin_auto_chop(tree)` and steps `await physics_frame`, checking `tree.tree_health`. Keep test scripts outside the repo (e.g. `/tmp`).
+- Verified 2026-11-14 headless: auto-chop fells a tree from 8 different approach positions, keeps `current_tool`, cancels on tool switch, and cancels when blocked. Real keyboard/mouse/gamepad play was not tested.

@@ -46,7 +46,14 @@ var auto_chop_target: Node2D = null
 var auto_chop_active: bool = false
 var auto_chop_swing_pending: bool = false
 var auto_chop_swing_cooldown: float = 0.0
+var auto_chop_stuck_time: float = 0.0
+var auto_chop_last_pos: Vector2 = Vector2.ZERO
 const AUTO_CHOP_SWING_INTERVAL: float = 0.72
+# Stand distance must stay well below the axe hit range in level.gd (< 22) and
+# below AUTO_CHOP_RANGE minus the arrival tolerance used by move() (4.0).
+const AUTO_CHOP_RANGE: float = 20.0
+const AUTO_CHOP_STAND_DISTANCE: float = 14.0
+const AUTO_CHOP_STUCK_TIMEOUT: float = 1.0
 
 signal tool_use(tool: Enum.Tool, pos: Vector2, dir: Vector2)
 signal do_action(anim_tree: AnimationTree, property: StringName, tool: Enum.Tool, pos: Vector2, dir: Vector2)
@@ -348,10 +355,22 @@ func _get_clicked_tree(mouse_pos: Vector2) -> Node2D:
 	return selected_tree
 
 
+# Axe animations are blended per direction; a diagonal blend position plays two
+# animations at once and fires tool_use_emit twice (double damage). Snap to 4 directions.
+func _to_cardinal(vec: Vector2) -> Vector2:
+	if vec == Vector2.ZERO:
+		return animation_direction
+	if abs(vec.x) > abs(vec.y):
+		return Vector2.RIGHT if vec.x > 0.0 else Vector2.LEFT
+	return Vector2.DOWN if vec.y > 0.0 else Vector2.UP
+
+
 func _begin_auto_chop(tree: Node2D) -> void:
 	auto_chop_target = tree
 	auto_chop_active = true
 	auto_chop_swing_pending = false
+	auto_chop_stuck_time = 0.0
+	auto_chop_last_pos = global_position
 	is_moving_to_target = false
 	_process_auto_chop()
 
@@ -360,6 +379,7 @@ func _cancel_auto_chop() -> void:
 	auto_chop_active = false
 	auto_chop_swing_pending = false
 	auto_chop_swing_cooldown = 0.0
+	auto_chop_stuck_time = 0.0
 	auto_chop_target = null
 	is_moving_to_target = false
 
@@ -379,17 +399,26 @@ func _process_auto_chop(delta: float = 0.0) -> void:
 		return
 
 	var to_tree: Vector2 = auto_chop_target.global_position - global_position
-	if to_tree.length() > 19.0:
+	if to_tree.length() > AUTO_CHOP_RANGE:
 		var approach_direction := to_tree.normalized()
-		update_facing_direction(approach_direction)
-		target_position = auto_chop_target.global_position - approach_direction * 17.0
+		update_facing_direction(_to_cardinal(approach_direction))
+		target_position = auto_chop_target.global_position - approach_direction * AUTO_CHOP_STAND_DISTANCE
 		is_moving_to_target = true
+		# Give up if the player cannot make progress (blocked path) instead of freezing.
+		if delta > 0.0:
+			if global_position.distance_to(auto_chop_last_pos) < 0.1:
+				auto_chop_stuck_time += delta
+				if auto_chop_stuck_time >= AUTO_CHOP_STUCK_TIMEOUT:
+					_cancel_auto_chop()
+					return
+			else:
+				auto_chop_stuck_time = 0.0
+		auto_chop_last_pos = global_position
 		return
+	auto_chop_stuck_time = 0.0
 
 	is_moving_to_target = false
-	var chop_direction := to_tree.normalized()
-	if chop_direction == Vector2.ZERO:
-		chop_direction = animation_direction
+	var chop_direction: Vector2 = _to_cardinal(to_tree)
 	update_facing_direction(chop_direction)
 	if auto_chop_swing_pending:
 		auto_chop_swing_cooldown -= delta
