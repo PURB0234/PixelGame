@@ -11,6 +11,7 @@
 - For gameplay changes, reuse existing signals, animations, damage, health, drops, and interaction pipelines wherever possible.
 - Avoid broad refactors. Keep changes small and compatible with the current branch.
 - Never claim a feature is tested unless it was actually run and verified in the target environment. State clearly when Godot/runtime testing was not possible.
+- Push limitation: the AI sandbox has no GitHub credentials, so `git push` fails there. Never claim a push succeeded without verifying with `git ls-remote origin master`; if it fails, export the commit with `git format-patch -1 HEAD --stdout` and tell the owner to run `git am <file>.patch && git push`.
 - Commit and push after every completed change (authorized by the owner). Commit only the files needed for the task; never commit `.tmp` files or Godot cache.
 - After changes, report only the files changed, the commit (if any), and any important testing limitation.
 
