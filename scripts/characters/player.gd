@@ -364,7 +364,7 @@ func _cancel_auto_chop() -> void:
 	is_moving_to_target = false
 
 
-func _process_auto_chop(delta: float) -> void:
+func _process_auto_chop(delta: float = 0.0) -> void:
 	if not auto_chop_active:
 		return
 	if current_state != Enum.State.DEFAULT or current_tool != Enum.Tool.AXE or is_dead:

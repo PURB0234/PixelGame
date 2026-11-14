@@ -22,3 +22,5 @@
 - Do not change `current_tool` as part of auto-chop. The axe animation state is separate from the selected tool value; only the user's tool-switch input may change the selected tool.
 - When changing player movement/animation locks, ensure auto-chop processing still advances and can recover from a missed animation callback without freezing the player.
 - Test in Godot: click a mature tree from a distance, confirm the player approaches, swings repeatedly, damages the same tree, stops after it falls, and does not change the selected tool. Also test manual movement and switching tools to confirm auto-chop cancels cleanly.
+
+- Parser compatibility: `_process_auto_chop()` may be called directly when auto-chop starts and deferred with an explicit delta after an animation callback. Keep its `delta` parameter optional (default `0.0`) or pass an argument at every call site; otherwise Godot reports `Too few arguments` during parsing.
