@@ -49,8 +49,6 @@
 - Preserve the original target_position; obstacle steering is temporary and must resume toward the clicked destination.
 - Regression checks in Godot: click past both sides of a house, mature tree, cave entrance, and rock; confirm the player walks around the obstacle and resumes toward the clicked point. Click into a fully blocked location and confirm the player stops rather than vibrating against it. Confirm keyboard movement and auto-chop behavior remain unchanged.
 - Runtime validation for this change is pending until the project is run in Godot; do not treat static inspection as a successful gameplay test.
-<<<<<<< HEAD
-=======
 
 ## Grass decoration asset rework
 
@@ -59,7 +57,6 @@
 - Asset crop dimensions vary. Anchor each Sprite2D by its own texture height so the bottom edge sits at the decoration origin; do not use a fixed 16px offset for every crop.
 - Keep existing random/dense selection, wind sway, player-triggered squish, and trigger collision behavior intact when changing the art pool.
 - Verify all preload paths exist and run the scene in Godot to inspect baseline alignment, overlap, and animation. Runtime visual validation is required before calling the rework complete.
->>>>>>> 781343887191a1cbc7e84e22dace1b4ae57561d4
 
 ### Grass decoration display scale correction
 
@@ -67,3 +64,10 @@
 - `grass_deco.gd` must scale each decoration uniformly so its displayed height is at most 40 world pixels (`DECORATION_MAX_HEIGHT`), preserving each crop's aspect ratio.
 - Never use `Vector2.ONE` as the display scale for these source crops. Do not scale the ground tile as a decoration variant.
 - Keep the texture-height-based vertical offset after applying the scale. Check dense placement and trigger behavior after changing scale.
+
+### Grass decoration scale and ground shadows
+
+- Keep foliage decoration display height capped at 30 world pixels via `DECORATION_MAX_HEIGHT`; preserve source aspect ratio and bottom anchoring.
+- Every foliage sprite should have a subtle, flattened dark-green `Polygon2D` ground shadow beneath its visual footprint. Keep shadows behind foliage (`z_index = -1`) and derive their position from the sprite's scaled offset so dense variants remain grounded.
+- Keep shadows small and low-opacity; do not add shadows to the grass ground tile itself.
+- When changing grass scale or shadows, verify in Godot that plants remain bottom-aligned, shadows sit at ground level, and dense variants do not produce oversized overlapping dark patches. Runtime visual validation is required before calling the change complete.
