@@ -39,3 +39,14 @@
 - Godot 4.7.2 can be downloaded from `https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip`.
 - Run `godot --headless --import --path .` once, then run a `SceneTree` script with `godot --headless --path . -s test.gd` that instantiates `res://scenes/levels/level.tscn`, gets `%Player`, calls `_begin_auto_chop(tree)` and steps `await physics_frame`, checking `tree.tree_health`. Keep test scripts outside the repo (e.g. `/tmp`).
 - Verified 2026-11-14 headless: auto-chop fells a tree from 8 different approach positions, keeps `current_tool`, cancels on tool switch, and cancels when blocked. Real keyboard/mouse/gamepad play was not tested.
+
+
+## Click-to-move obstacle avoidance
+
+- Manual mouse click movement is distinguished by is_click_move_target; do not apply its steering to keyboard movement or auto-chop approach.
+- _get_click_move_direction() probes the player's actual collision shape with test_move() using the existing collision mask. When the direct route is blocked, it selects and keeps a perpendicular side direction until the direct route opens; it stops if neither side is locally passable.
+- Keep facing animation driven by the final movement direction through the existing animate() / update_facing_direction() flow.
+- Preserve the original target_position; obstacle steering is temporary and must resume toward the clicked destination.
+- Regression checks in Godot: click past both sides of a house, mature tree, cave entrance, and rock; confirm the player walks around the obstacle and resumes toward the clicked point. Click into a fully blocked location and confirm the player stops rather than vibrating against it. Confirm keyboard movement and auto-chop behavior remain unchanged.
+- Runtime validation for this change is pending until the project is run in Godot; do not treat static inspection as a successful gameplay test.
+
