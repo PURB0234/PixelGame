@@ -18,6 +18,8 @@ var direction: Vector2
 var can_move: bool = true
 var target_position: Vector2 = Vector2.ZERO
 var is_moving_to_target: bool = false
+var is_click_move_target: bool = false
+var click_move_avoid_direction: Vector2 = Vector2.ZERO
 @onready var move_state_machine = $Animation/AnimationTree.get("parameters/StateMachine/playback")
 
 @onready var tool_state_machine = $Animation/AnimationTree.get("parameters/ToolStateMachine/playback")
@@ -161,13 +163,19 @@ func move():
 		if keyboard_dir != Vector2.ZERO:
 				_cancel_auto_chop()
 				is_moving_to_target = false
+				is_click_move_target = false
+				click_move_avoid_direction = Vector2.ZERO
 				direction = keyboard_dir
 		elif is_moving_to_target:
 				var diff: Vector2 = target_position - global_position
 				if diff.length() > 4.0:
 						direction = diff.normalized()
+						if is_click_move_target and not auto_chop_active:
+							direction = _get_click_move_direction(direction)
 				else:
 						is_moving_to_target = false
+						is_click_move_target = false
+						click_move_avoid_direction = Vector2.ZERO
 						direction = Vector2.ZERO
 		else:
 				direction = Vector2.ZERO
@@ -183,6 +191,52 @@ func move():
 		move_and_slide()
 	
 	
+
+# Click-to-move steering uses the player's real collision shape and mask.
+# Keep a stable side direction until the direct route around an obstacle opens.
+func _get_click_move_direction(desired: Vector2) -> Vector2:
+	const PROBE_DISTANCE: float = 8.0
+	const SIDE_STEP_DISTANCE: float = 12.0
+
+	if not test_move(global_transform, desired * PROBE_DISTANCE):
+		click_move_avoid_direction = Vector2.ZERO
+		return desired
+
+	if click_move_avoid_direction != Vector2.ZERO:
+		if not test_move(global_transform, click_move_avoid_direction * PROBE_DISTANCE):
+			click_move_avoid_direction = Vector2.ZERO
+		else:
+			return click_move_avoid_direction
+
+	var side_a := desired.rotated(PI * 0.5).normalized()
+	var side_b := desired.rotated(-PI * 0.5).normalized()
+	var side_a_blocked := test_move(global_transform, side_a * PROBE_DISTANCE)
+	var side_b_blocked := test_move(global_transform, side_b * PROBE_DISTANCE)
+
+	if side_a_blocked and side_b_blocked:
+		# No safe local detour exists (for example, the click is inside a wall).
+		# Stop instead of continuously pushing into the obstacle.
+		is_moving_to_target = false
+		is_click_move_target = false
+		return Vector2.ZERO
+
+	if side_a_blocked:
+		click_move_avoid_direction = side_b
+	elif side_b_blocked:
+		click_move_avoid_direction = side_a
+	else:
+		var next_a := global_position + side_a * SIDE_STEP_DISTANCE
+		var next_b := global_position + side_b * SIDE_STEP_DISTANCE
+		var distance_a := next_a.distance_squared_to(target_position)
+		var distance_b := next_b.distance_squared_to(target_position)
+		if is_equal_approx(distance_a, distance_b):
+			# Stable tie-breaker prevents left/right oscillation at symmetric walls.
+			click_move_avoid_direction = side_a if desired.x + desired.y >= 0.0 else side_b
+		else:
+			click_move_avoid_direction = side_a if distance_a < distance_b else side_b
+
+	return click_move_avoid_direction
+
 func get_basic_input():
 	# Switch seeds
 	if Input.is_action_just_pressed("seed_forward"):
@@ -226,8 +280,12 @@ func get_basic_input():
 			if mouse_offset.length() > 28.0:
 				target_position = mouse_pos
 				is_moving_to_target = true
+				is_click_move_target = true
+				click_move_avoid_direction = Vector2.ZERO
 			else:
 				is_moving_to_target = false
+				is_click_move_target = false
+				click_move_avoid_direction = Vector2.ZERO
 				if can_interact and last_interactable:
 					last_interactable.interact(self)
 				else:
@@ -368,6 +426,8 @@ func _to_cardinal(vec: Vector2) -> Vector2:
 func _begin_auto_chop(tree: Node2D) -> void:
 	auto_chop_target = tree
 	auto_chop_active = true
+	is_click_move_target = false
+	click_move_avoid_direction = Vector2.ZERO
 	auto_chop_swing_pending = false
 	auto_chop_stuck_time = 0.0
 	auto_chop_last_pos = global_position
@@ -382,6 +442,8 @@ func _cancel_auto_chop() -> void:
 	auto_chop_stuck_time = 0.0
 	auto_chop_target = null
 	is_moving_to_target = false
+	is_click_move_target = false
+	click_move_avoid_direction = Vector2.ZERO
 
 
 func _process_auto_chop(delta: float = 0.0) -> void:
