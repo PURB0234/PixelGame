@@ -2,28 +2,27 @@
 extends Node2D
 
 const FLORA_TEXTURES: Array[Texture2D] = [
-		preload("res://graphics/objects/harvest_flora/01_white_daisy.png"),
-		preload("res://graphics/objects/harvest_flora/02_red_tulip.png"),
-		preload("res://graphics/objects/harvest_flora/03_yellow_dandelion.png"),
-		preload("res://graphics/objects/harvest_flora/04_purple_lavender.png"),
-		preload("res://graphics/objects/harvest_flora/05_pink_cosmos.png"),
-		preload("res://graphics/objects/harvest_flora/06_blue_hydrangea.png"),
-		preload("res://graphics/objects/harvest_flora/07_four_leaf_clover.png"),
-		preload("res://graphics/objects/harvest_flora/08_wild_grass_short.png"),
-		preload("res://graphics/objects/harvest_flora/09_wild_grass_tall.png"),
-		preload("res://graphics/objects/harvest_flora/10_round_bush.png"),
-		preload("res://graphics/objects/harvest_flora/11_berry_bush.png"),
-		preload("res://graphics/objects/harvest_flora/12_fern_sprout.png"),
-		preload("res://graphics/objects/harvest_flora/13_autumn_leaf_patch.png"),
-		preload("res://graphics/objects/harvest_flora/14_wild_sprout.png"),
-		preload("res://graphics/objects/harvest_flora/15_sunflower_mini.png"),
-		preload("res://graphics/objects/harvest_flora/16_golden_wheat_grass.png"),
-		preload("res://graphics/objects/harvest_flora/17_succulent_plant.png"),
-		preload("res://graphics/objects/harvest_flora/18_flower_cluster.png"),
+	preload("res://graphics/objects/grass_assets/07_grass_clump.png"),
+	preload("res://graphics/objects/grass_assets/08_grass_clump.png"),
+	preload("res://graphics/objects/grass_assets/09_white_flower_grass.png"),
+	preload("res://graphics/objects/grass_assets/10_berry_grass.png"),
+	preload("res://graphics/objects/grass_assets/11_leaf_bush.png"),
+	preload("res://graphics/objects/grass_assets/12_broad_leaf_plant.png"),
+	preload("res://graphics/objects/grass_assets/13_purple_flower_grass.png"),
+	preload("res://graphics/objects/grass_assets/14_white_flower_bush.png"),
+	preload("res://graphics/objects/grass_assets/15_leaf_bush.png"),
+	preload("res://graphics/objects/grass_assets/16_pink_flower_bush.png"),
+	preload("res://graphics/objects/grass_assets/17_orange_flower_bush.png"),
+	preload("res://graphics/objects/grass_assets/18_small_leaf_plant.png"),
+	preload("res://graphics/objects/grass_assets/19_white_flower_patch.png"),
+	preload("res://graphics/objects/grass_assets/20_round_leaf_bush.png"),
+	preload("res://graphics/objects/grass_assets/21_leafy_grass_clump.png"),
+	preload("res://graphics/objects/grass_assets/26_small_rock_grass.png"),
+	preload("res://graphics/objects/grass_assets/27_leafy_plant.png"),
 ]
 
 @export var random: bool = false
-@export_range(0, 17, 1) var variant: int = 0:
+@export_range(0, 16, 1) var variant: int = 0:
 		set(value):
 				variant = clampi(value, 0, FLORA_TEXTURES.size() - 1)
 				_rebuild_sprites()
@@ -71,11 +70,11 @@ func _rebuild_sprites() -> void:
 				sprite.texture = FLORA_TEXTURES[chosen_variant]
 				sprite.scale = Vector2.ONE
 				if i == 0:
-						sprite.offset = Vector2(0, -16)
+						sprite.offset = Vector2(0.0, -sprite.texture.get_height() * 0.5)
 				else:
 						sprite.offset = Vector2(
 								randf_range(-spread, spread),
-								-16.0 + randf_range(-spread * 0.25, spread * 0.25)
+								-sprite.texture.get_height() * 0.5 + randf_range(-spread * 0.1, spread * 0.1)
 						)
 				sprite.flip_h = randf() > 0.5
 				sprite.z_index = i
