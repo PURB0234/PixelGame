@@ -2,24 +2,7 @@
 extends Node2D
 
 const FLORA_TEXTURES: Array[Texture2D] = [
-		preload("res://graphics/objects/harvest_flora/01_white_daisy.png"),
-		preload("res://graphics/objects/harvest_flora/02_red_tulip.png"),
-		preload("res://graphics/objects/harvest_flora/03_yellow_dandelion.png"),
-		preload("res://graphics/objects/harvest_flora/04_purple_lavender.png"),
-		preload("res://graphics/objects/harvest_flora/05_pink_cosmos.png"),
-		preload("res://graphics/objects/harvest_flora/06_blue_hydrangea.png"),
-		preload("res://graphics/objects/harvest_flora/07_four_leaf_clover.png"),
-		preload("res://graphics/objects/harvest_flora/08_wild_grass_short.png"),
-		preload("res://graphics/objects/harvest_flora/09_wild_grass_tall.png"),
-		preload("res://graphics/objects/harvest_flora/10_round_bush.png"),
-		preload("res://graphics/objects/harvest_flora/11_berry_bush.png"),
-		preload("res://graphics/objects/harvest_flora/12_fern_sprout.png"),
-		preload("res://graphics/objects/harvest_flora/13_autumn_leaf_patch.png"),
-		preload("res://graphics/objects/harvest_flora/14_wild_sprout.png"),
-		preload("res://graphics/objects/harvest_flora/15_sunflower_mini.png"),
-		preload("res://graphics/objects/harvest_flora/16_golden_wheat_grass.png"),
-		preload("res://graphics/objects/harvest_flora/17_succulent_plant.png"),
-		preload("res://graphics/objects/harvest_flora/18_flower_cluster.png"),
+		preload("res://graphics/objects/grass_assets/06_grass_ground_tile.png"),
 ]
 
 @export var random: bool = false

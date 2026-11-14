@@ -49,4 +49,3 @@
 - Preserve the original target_position; obstacle steering is temporary and must resume toward the clicked destination.
 - Regression checks in Godot: click past both sides of a house, mature tree, cave entrance, and rock; confirm the player walks around the obstacle and resumes toward the clicked point. Click into a fully blocked location and confirm the player stops rather than vibrating against it. Confirm keyboard movement and auto-chop behavior remain unchanged.
 - Runtime validation for this change is pending until the project is run in Godot; do not treat static inspection as a successful gameplay test.
-
