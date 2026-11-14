@@ -11,7 +11,7 @@
 - For gameplay changes, reuse existing signals, animations, damage, health, drops, and interaction pipelines wherever possible.
 - Avoid broad refactors. Keep changes small and compatible with the current branch.
 - Never claim a feature is tested unless it was actually run and verified in the target environment. State clearly when Godot/runtime testing was not possible.
-- Push limitation: the AI sandbox has no GitHub credentials, so `git push` fails there. Never claim a push succeeded without verifying with `git ls-remote origin master`; if it fails, export the commit with `git format-patch -1 HEAD --stdout` and tell the owner to run `git am <file>.patch && git push`.
+- Push workflow: the sandbox has no GitHub credentials by default. The owner provides a short-lived fine-grained token (only repo `PixelGame`, Contents: Read and write). Push with a one-off header, never store the token (no remote URL, no git config, no files): `git -c http.extraheader="Authorization: Basic $(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)" push origin HEAD:master`. Always verify with `git ls-remote origin master`. Without a token, export `git format-patch -1 HEAD --stdout` and tell the owner to run `git am <file>.patch && git push`. Remind the owner to revoke the token after use.
 - Commit and push after every completed change (authorized by the owner). Commit only the files needed for the task; never commit `.tmp` files or Godot cache.
 - After changes, report only the files changed, the commit (if any), and any important testing limitation.
 
