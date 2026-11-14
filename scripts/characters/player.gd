@@ -40,6 +40,12 @@ signal build(machine: Enum.Machine)
 signal change_machine(machine: Enum.Machine)
 
 var animation_direction: Vector2 = Vector2(0, 1)
+
+# One-click tree chopping: keep the selected tree until it becomes a stump.
+var auto_chop_target: Node2D = null
+var auto_chop_active: bool = false
+var auto_chop_swing_pending: bool = false
+
 signal tool_use(tool: Enum.Tool, pos: Vector2, dir: Vector2)
 signal do_action(anim_tree: AnimationTree, property: StringName, tool: Enum.Tool, pos: Vector2, dir: Vector2)
 
@@ -121,6 +127,7 @@ func _physics_process(delta: float) -> void:
 				get_basic_input()
 				move()
 				animate()
+				_process_auto_chop()
 		
 		Enum.State.FISHING:
 			get_fishing_input()
@@ -143,6 +150,7 @@ func _physics_process(delta: float) -> void:
 func move():
 		var keyboard_dir: Vector2 = Input.get_vector("left", "right", "up", "down")
 		if keyboard_dir != Vector2.ZERO:
+				_cancel_auto_chop()
 				is_moving_to_target = false
 				direction = keyboard_dir
 		elif is_moving_to_target:
@@ -184,31 +192,38 @@ func get_basic_input():
 
 	if dir != 0:
 		current_tool = posmod((current_tool + dir), tools_count) as Enum.Tool
+		if current_tool != Enum.Tool.AXE:
+			_cancel_auto_chop()
 		$ToolUI.reveal(current_tool, null)
 		update_control_ui.emit(Enum.KEYBOARD.CHANGE_TOOL, current_tool)
 
 	if Input.is_action_just_pressed("action"):
-				var mouse_pos: Vector2 = get_global_mouse_position()
-				var mouse_offset: Vector2 = mouse_pos - global_position
-				var click_dir: Vector2 = Vector2.DOWN
-				if abs(mouse_offset.x) > abs(mouse_offset.y):
-						click_dir = Vector2.RIGHT if mouse_offset.x > 0 else Vector2.LEFT
-				else:
-						click_dir = Vector2.DOWN if mouse_offset.y > 0 else Vector2.UP
-				update_facing_direction(click_dir)
+		var mouse_pos: Vector2 = get_global_mouse_position()
+		var mouse_offset: Vector2 = mouse_pos - global_position
+		var clicked_tree: Node2D = _get_clicked_tree(mouse_pos) if current_tool == Enum.Tool.AXE else null
 
-#Jika klik jauh (> 28 px), jalan otomatis ke titik tersebut
-				if mouse_offset.length() > 28.0:
-						target_position = mouse_pos
-						is_moving_to_target = true
+		if clicked_tree:
+			_begin_auto_chop(clicked_tree)
+		else:
+			_cancel_auto_chop()
+			var click_dir: Vector2 = Vector2.DOWN
+			if abs(mouse_offset.x) > abs(mouse_offset.y):
+				click_dir = Vector2.RIGHT if mouse_offset.x > 0 else Vector2.LEFT
+			else:
+				click_dir = Vector2.DOWN if mouse_offset.y > 0 else Vector2.UP
+			update_facing_direction(click_dir)
+
+			# Klik jauh tetap memakai sistem auto-walk yang sudah ada.
+			if mouse_offset.length() > 28.0:
+				target_position = mouse_pos
+				is_moving_to_target = true
+			else:
+				is_moving_to_target = false
+				if can_interact and last_interactable:
+					last_interactable.interact(self)
 				else:
-#Jika klik dekat (dalam jangkauan 1 tile), lakukan aksi / serang
-						is_moving_to_target = false
-						if can_interact and last_interactable:
-								last_interactable.interact(self)
-						else:
-								tool_state_machine.travel(Data.TOOL_STATE_ANIMATIONS[current_tool])
-								do_action.emit($Animation/AnimationTree, "parameters/OneShot/request", current_tool, position, animation_direction)
+					tool_state_machine.travel(Data.TOOL_STATE_ANIMATIONS[current_tool])
+					do_action.emit($Animation/AnimationTree, "parameters/OneShot/request", current_tool, position, animation_direction)
 		
 	if Input.is_action_just_pressed("highlighter"):
 		Data.TARGET_HIGHLIGHTER = not Data.TARGET_HIGHLIGHTER 
@@ -310,6 +325,77 @@ func update_facing_direction(new_dir: Vector2) -> void:
 				$Animation/AnimationTree.set("parameters/ToolStateMachine/" + tool_animation + "/blend_position", animation_direction)
 	
 		
+func _get_clicked_tree(mouse_pos: Vector2) -> Node2D:
+	var selected_tree: Node2D = null
+	var nearest_distance: float = INF
+	for node in get_tree().get_nodes_in_group("Tree"):
+		var candidate := node as Node2D
+		if candidate == null or not candidate.is_in_group("Axe_able"):
+			continue
+		var sprite := candidate.get_node_or_null("Sprite2D") as Sprite2D
+		var clicked := false
+		if sprite and sprite.texture:
+			clicked = sprite.get_rect().has_point(sprite.to_local(mouse_pos))
+		else:
+			clicked = candidate.global_position.distance_to(mouse_pos) <= 18.0
+		if clicked:
+			var distance := candidate.global_position.distance_to(mouse_pos)
+			if distance < nearest_distance:
+				nearest_distance = distance
+				selected_tree = candidate
+	return selected_tree
+
+
+func _begin_auto_chop(tree: Node2D) -> void:
+	auto_chop_target = tree
+	auto_chop_active = true
+	auto_chop_swing_pending = false
+	is_moving_to_target = false
+	_process_auto_chop()
+
+
+func _cancel_auto_chop() -> void:
+	auto_chop_active = false
+	auto_chop_swing_pending = false
+	auto_chop_target = null
+	is_moving_to_target = false
+
+
+func _process_auto_chop() -> void:
+	if not auto_chop_active:
+		return
+	if current_state != Enum.State.DEFAULT or current_tool != Enum.Tool.AXE or is_dead:
+		_cancel_auto_chop()
+		return
+	if not is_instance_valid(auto_chop_target):
+		_cancel_auto_chop()
+		return
+	if not auto_chop_target.is_in_group("Tree") or not auto_chop_target.is_in_group("Axe_able"):
+		# Stop when the tree has fallen; leave its stump untouched.
+		_cancel_auto_chop()
+		return
+
+	var to_tree: Vector2 = auto_chop_target.global_position - global_position
+	if to_tree.length() > 19.0:
+		var approach_direction := to_tree.normalized()
+		update_facing_direction(approach_direction)
+		target_position = auto_chop_target.global_position - approach_direction * 17.0
+		is_moving_to_target = true
+		return
+
+	is_moving_to_target = false
+	var chop_direction := to_tree.normalized()
+	if chop_direction == Vector2.ZERO:
+		chop_direction = animation_direction
+	update_facing_direction(chop_direction)
+	if auto_chop_swing_pending:
+		return
+
+	auto_chop_swing_pending = true
+	tool_state_machine.travel(Data.TOOL_STATE_ANIMATIONS[Enum.Tool.AXE])
+	do_action.emit($Animation/AnimationTree, "parameters/OneShot/request", Enum.Tool.AXE, position, animation_direction)
+
+
 func tool_use_emit():
 	tool_use.emit(current_tool, position, animation_direction)
 	if current_tool == Enum.Tool.AXE or current_tool == Enum.Tool.SWORD:
@@ -326,8 +412,11 @@ func _on_animation_tree_animation_started(_anim_name: StringName) -> void:
 	can_move = false
 
 
-func _on_animation_tree_animation_finished(_anim_name: StringName) -> void:
+func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
 	can_move = true
+	if auto_chop_active and String(anim_name).begins_with("axe_"):
+		auto_chop_swing_pending = false
+		call_deferred("_process_auto_chop")
 
 
 # Fishing Part
