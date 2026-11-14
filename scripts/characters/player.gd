@@ -45,6 +45,8 @@ var animation_direction: Vector2 = Vector2(0, 1)
 var auto_chop_target: Node2D = null
 var auto_chop_active: bool = false
 var auto_chop_swing_pending: bool = false
+var auto_chop_swing_cooldown: float = 0.0
+const AUTO_CHOP_SWING_INTERVAL: float = 0.72
 
 signal tool_use(tool: Enum.Tool, pos: Vector2, dir: Vector2)
 signal do_action(anim_tree: AnimationTree, property: StringName, tool: Enum.Tool, pos: Vector2, dir: Vector2)
@@ -127,7 +129,7 @@ func _physics_process(delta: float) -> void:
 				get_basic_input()
 				move()
 				animate()
-				_process_auto_chop()
+			_process_auto_chop(delta)
 		
 		Enum.State.FISHING:
 			get_fishing_input()
@@ -357,11 +359,12 @@ func _begin_auto_chop(tree: Node2D) -> void:
 func _cancel_auto_chop() -> void:
 	auto_chop_active = false
 	auto_chop_swing_pending = false
+	auto_chop_swing_cooldown = 0.0
 	auto_chop_target = null
 	is_moving_to_target = false
 
 
-func _process_auto_chop() -> void:
+func _process_auto_chop(delta: float) -> void:
 	if not auto_chop_active:
 		return
 	if current_state != Enum.State.DEFAULT or current_tool != Enum.Tool.AXE or is_dead:
@@ -389,9 +392,14 @@ func _process_auto_chop() -> void:
 		chop_direction = animation_direction
 	update_facing_direction(chop_direction)
 	if auto_chop_swing_pending:
-		return
+		auto_chop_swing_cooldown -= delta
+		if auto_chop_swing_cooldown > 0.0:
+			return
+		auto_chop_swing_pending = false
+		can_move = true
 
 	auto_chop_swing_pending = true
+	auto_chop_swing_cooldown = AUTO_CHOP_SWING_INTERVAL
 	tool_state_machine.travel(Data.TOOL_STATE_ANIMATIONS[Enum.Tool.AXE])
 	do_action.emit($Animation/AnimationTree, "parameters/OneShot/request", Enum.Tool.AXE, position, animation_direction)
 
@@ -416,7 +424,8 @@ func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
 	can_move = true
 	if auto_chop_active and String(anim_name).begins_with("axe_"):
 		auto_chop_swing_pending = false
-		call_deferred("_process_auto_chop")
+		auto_chop_swing_cooldown = 0.0
+		call_deferred("_process_auto_chop", 0.0)
 
 
 # Fishing Part
