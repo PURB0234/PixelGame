@@ -1,6 +1,6 @@
 [gd_scene format=4 uid="uid://dkaf0otbgtrp5"]
 
-[ext_resource type="Texture2D" path="res://graphics/tilesets/stardew_grass_field.webp" id="1_b2cq8"]
+[ext_resource type="Texture2D" uid="uid://cc04b5oyjs2oq" path="res://graphics/Ninja Adventure - Asset Pack/Ninja Adventure - Asset Pack/Backgrounds/Tilesets/TilesetField.png" id="1_b2cq8"]
 [ext_resource type="Script" uid="uid://8vpund5t01cr" path="res://scripts/level.gd" id="1_urvlt"]
 [ext_resource type="PackedScene" uid="uid://b0mnopqlx5dix" path="res://scenes/characters/player.tscn" id="2_b2cq8"]
 [ext_resource type="Texture2D" uid="uid://8cd75smu56l5" path="res://graphics/Ninja Adventure - Asset Pack/Ninja Adventure - Asset Pack/Backgrounds/Tilesets/TilesetFloor.png" id="2_xb4v1"]
