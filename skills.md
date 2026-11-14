@@ -60,3 +60,10 @@
 - Keep existing random/dense selection, wind sway, player-triggered squish, and trigger collision behavior intact when changing the art pool.
 - Verify all preload paths exist and run the scene in Godot to inspect baseline alignment, overlap, and animation. Runtime visual validation is required before calling the rework complete.
 >>>>>>> 781343887191a1cbc7e84e22dace1b4ae57561d4
+
+### Grass decoration display scale correction
+
+- The source PNG crops in `graphics/objects/grass_assets/` are large (roughly 102–186 px tall), not game-world-sized sprites.
+- `grass_deco.gd` must scale each decoration uniformly so its displayed height is at most 40 world pixels (`DECORATION_MAX_HEIGHT`), preserving each crop's aspect ratio.
+- Never use `Vector2.ONE` as the display scale for these source crops. Do not scale the ground tile as a decoration variant.
+- Keep the texture-height-based vertical offset after applying the scale. Check dense placement and trigger behavior after changing scale.
