@@ -22,7 +22,7 @@ const FLORA_TEXTURES: Array[Texture2D] = [
 ]
 
 # Cropped source art is 102-186 px tall; display decorations at a game-world scale.
-const DECORATION_MAX_HEIGHT: float = 40.0
+const DECORATION_MAX_HEIGHT: float = 30.0
 
 @export var random: bool = false
 @export_range(0, 16, 1) var variant: int = 0:
@@ -82,9 +82,37 @@ func _rebuild_sprites() -> void:
 						)
 				sprite.flip_h = randf() > 0.5
 				sprite.z_index = i
+
+				# Soft ground shadow follows each plant's visual footprint.
+				var shadow_position := Vector2(
+						sprite.offset.x * sprite.scale.x,
+						(sprite.offset.y + texture_height * 0.5) * sprite.scale.y
+				)
+				var shadow_width: float = clampf(
+						float(sprite.texture.get_width()) * sprite.scale.x * 0.48,
+						8.0,
+						16.0
+				)
+				var shadow := _create_ground_shadow(shadow_position, shadow_width)
+				add_child(shadow)
 				add_child(sprite)
 				_sprites.append(sprite)
 				_time_offsets.append(randf_range(0.0, 10.0))
+
+func _create_ground_shadow(shadow_position: Vector2, shadow_width: float) -> Polygon2D:
+		var shadow := Polygon2D.new()
+		shadow.name = "GroundShadow"
+		shadow.position = shadow_position
+		shadow.color = Color(0.10, 0.13, 0.08, 0.28)
+		shadow.z_index = -1
+
+		var points := PackedVector2Array()
+		const SEGMENTS: int = 12
+		for point_index in range(SEGMENTS):
+				var angle: float = TAU * float(point_index) / float(SEGMENTS)
+				points.append(Vector2(cos(angle) * shadow_width * 0.5, sin(angle) * 2.2))
+		shadow.polygon = points
+		return shadow
 
 func _setup_trigger_area() -> void:
 		if has_node("TriggerArea"):
